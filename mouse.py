@@ -3,6 +3,8 @@ from .enums import MouseButton
 from .connection import SerialTransport
 from .errors import MakcuCommandError
 from serial.tools import list_ports
+import ctypes
+import time
 
 class AxisButton:
     def __init__(self, name: str) -> None:
@@ -73,6 +75,53 @@ class Mouse:
 
     def move(self, x: int, y: int) -> None:
         self.transport.send_command(f"km.move({x},{y})")
+
+    def move_abs(self,
+        target: tuple[int, int],
+        speed: int = 1,
+        wait_ms: int = 2,
+        debug: bool = False) -> None:
+
+        def get_mouse_speed_multiplier() -> float:
+            """Return multiplier to convert pixels to mickeys based on Windows pointer speed."""
+            SPI_GETMOUSESPEED = 0x0070
+            speed = ctypes.c_uint()
+            ctypes.windll.user32.SystemParametersInfoW(
+                SPI_GETMOUSESPEED, 0, ctypes.byref(speed), 0
+            )
+            return speed.value / 10.0
+        
+        def get_cursor_pos():
+            class POINT(ctypes.Structure):
+                _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
+            pt = POINT()
+            ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+            return pt.x, pt.y
+        
+        multiplier = get_mouse_speed_multiplier()
+        last_pos = None
+        end_x, end_y = target
+        
+        while True:
+            cx, cy = get_cursor_pos()
+            dx, dy = end_x - cx, end_y - cy
+
+            if abs(dx) <= 1 and abs(dy) <= 1:
+                break
+            
+            move_x = max(-speed, min(speed, int(dx / multiplier)))
+            move_y = max(-speed, min(speed, int(dy / multiplier)))
+
+            if debug and (cx, cy) != last_pos:
+                print(
+                    f"[DEBUG] Current: ({cx}, {cy}) | Target delta: ({move_x}, {move_y}) -> "
+                    f"Multiplier={multiplier:.3f} | Speed={speed} | Last=({last_pos[0]}, {last_pos[1]}) | "
+                    f"|Δx|={abs(dx):.2f}, |Δy|={abs(dy):.2f}"
+                )
+                last_pos = (cx, cy)
+
+            self.transport.send_command(f"km.move({move_x},{move_y})")
+            time.sleep(wait_ms / 1000)
 
     def click(self, button: MouseButton) -> None:
         if button not in self._BUTTON_COMMANDS:

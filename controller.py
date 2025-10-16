@@ -98,6 +98,21 @@ class MakcuController:
         self.mouse.move(dx, dy)
 
     @maybe_async
+    def move_abs(
+        self,
+        target: tuple[int, int],
+        speed: int = 1,
+        wait_ms: int = 2,
+        debug: bool = False,
+    ) -> None:
+        self._check_connection()
+        self.mouse.move_abs(target, speed=speed, wait_ms=wait_ms, debug=debug)
+
+        if debug:
+            print(f"[DEBUG] Moving mouse to {target} with speed={speed}, wait_ms={wait_ms}")
+
+
+    @maybe_async
     def batch_execute(self, actions: List[Callable[[], None]]) -> None:
         """Execute a batch of actions in sequence.
         
