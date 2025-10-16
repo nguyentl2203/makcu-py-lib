@@ -374,15 +374,9 @@ Version Information
 
 .. py:data:: LIBRARY_VERSION
    :type: str
-   :value: "2.2.1"
+   :value: "2.3.0"
 
    Current library version
-
-.. py:data:: API_VERSION
-   :type: str
-   :value: "2.0"
-
-   API version (both sync and async APIs supported)
 
 **Usage Examples:**
 

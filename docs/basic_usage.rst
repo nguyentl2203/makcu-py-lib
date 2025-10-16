@@ -116,6 +116,18 @@ Mouse Movement
        ctrl_y=200           # Control point Y
    )
 
+**Absolute Mouse Movement:**
+
+.. code-block:: python
+
+   makcu.move_abs(
+       target: tuple[int, int], # (x, y) coordinates on screen
+       speed: int = 1,          # 1 (slow) to 10 (fast)
+       wait_ms: int = 2,        # wait time after move
+       debug: bool = False      # enable debug output
+   )
+
+
 **Dragging:**
 
 .. code-block:: python
