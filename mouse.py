@@ -11,8 +11,6 @@ class AxisButton:
         self.name = name
 
 class Mouse:
-    
-
     _BUTTON_COMMANDS = {
         MouseButton.LEFT: "left",
         MouseButton.RIGHT: "right",
@@ -20,7 +18,6 @@ class Mouse:
         MouseButton.MOUSE4: "ms1",
         MouseButton.MOUSE5: "ms2",
     }
-    
 
     _PRESS_COMMANDS = {}
     _RELEASE_COMMANDS = {}
@@ -32,18 +29,13 @@ class Mouse:
         self.transport = transport
         self._lock_states_cache: int = 0
         self._cache_valid = False
-        
-
         self._init_command_cache()
     
     def _init_command_cache(self) -> None:
-
         for button, cmd in self._BUTTON_COMMANDS.items():
             self._PRESS_COMMANDS[button] = f"km.{cmd}(1)"
             self._RELEASE_COMMANDS[button] = f"km.{cmd}(0)"
-        
-
-
+    
         lock_targets = [
             ("LEFT", "ml", 0),
             ("RIGHT", "mr", 1),
@@ -53,7 +45,7 @@ class Mouse:
             ("X", "mx", 5),
             ("Y", "my", 6),
         ]
-        
+
         for name, cmd, bit in lock_targets:
             self._LOCK_COMMANDS[name] = (f"km.lock_{cmd}(1)", bit)
             self._UNLOCK_COMMANDS[name] = (f"km.lock_{cmd}(0)", bit)
@@ -62,7 +54,6 @@ class Mouse:
     def _send_button_command(self, button: MouseButton, state: int) -> None:
         if button not in self._BUTTON_COMMANDS:
             raise MakcuCommandError(f"Unsupported button: {button}")
-        
 
         cmd = self._PRESS_COMMANDS[button] if state else self._RELEASE_COMMANDS[button]
         self.transport.send_command(cmd)
@@ -79,8 +70,7 @@ class Mouse:
     def move_abs(self,
         target: tuple[int, int],
         speed: int = 1,
-        wait_ms: int = 2,
-        debug: bool = False) -> None:
+        wait_ms: int = 2) -> None:
 
         def get_mouse_speed_multiplier() -> float:
             """Return multiplier to convert pixels to mickeys based on Windows pointer speed."""
@@ -99,8 +89,10 @@ class Mouse:
             return pt.x, pt.y
         
         multiplier = get_mouse_speed_multiplier()
-        last_pos = None
         end_x, end_y = target
+        
+        # clamp speed to be between 1-14. >15 creates an infinite overflick loop issue.
+        speed = max(1, min(speed, 14))
         
         while True:
             cx, cy = get_cursor_pos()
@@ -112,26 +104,16 @@ class Mouse:
             move_x = max(-speed, min(speed, int(dx / multiplier)))
             move_y = max(-speed, min(speed, int(dy / multiplier)))
 
-            if debug and (cx, cy) != last_pos:
-                print(
-                    f"[DEBUG] Current: ({cx}, {cy}) | Target delta: ({move_x}, {move_y}) -> "
-                    f"Multiplier={multiplier:.3f} | Speed={speed} | Last=({last_pos[0]}, {last_pos[1]}) | "
-                    f"|Δx|={abs(dx):.2f}, |Δy|={abs(dy):.2f}"
-                )
-                last_pos = (cx, cy)
-
             self.transport.send_command(f"km.move({move_x},{move_y})")
             time.sleep(wait_ms / 1000)
 
     def click(self, button: MouseButton) -> None:
         if button not in self._BUTTON_COMMANDS:
             raise MakcuCommandError(f"Unsupported button: {button}")
-        
 
         press_cmd = self._PRESS_COMMANDS[button]
         release_cmd = self._RELEASE_COMMANDS[button]
         
-
         transport = self.transport
         transport.send_command(press_cmd)
         transport.send_command(release_cmd)
@@ -154,7 +136,6 @@ class Mouse:
         
         self.transport.send_command(cmd)
         
-
         if lock:
             self._lock_states_cache |= (1 << bit)
         else:
@@ -243,7 +224,6 @@ class Mouse:
                 "MOUSE5": bool(self._lock_states_cache & (1 << 4)),
             }
         
-
         states = {}
         targets = ["X", "Y", "LEFT", "RIGHT", "MIDDLE", "MOUSE4", "MOUSE5"]
         
@@ -255,7 +235,6 @@ class Mouse:
                     is_locked = result.strip() == '1'
                     states[target] = is_locked
                     
-
                     if is_locked:
                         self._lock_states_cache |= (1 << bit)
                     else:
@@ -271,12 +250,10 @@ class Mouse:
     def is_locked(self, button: Union[MouseButton, AxisButton]) -> bool:
         try:
             target_name = button.name if hasattr(button, 'name') else str(button)
-            
 
             if self._cache_valid and target_name in self._LOCK_QUERY_COMMANDS:
                 _, bit = self._LOCK_QUERY_COMMANDS[target_name]
                 return bool(self._lock_states_cache & (1 << bit))
-            
 
             cmd, bit = self._LOCK_QUERY_COMMANDS[target_name]
             result = self.transport.send_command(cmd, expect_response=True, timeout=0.05)
@@ -287,7 +264,6 @@ class Mouse:
             result = result.strip()
             is_locked = result == '1'
             
-
             if is_locked:
                 self._lock_states_cache |= (1 << bit)
             else:
