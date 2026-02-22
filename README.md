@@ -3,6 +3,7 @@
 [![PyPI Version](https://img.shields.io/pypi/v/makcu.svg)](https://pypi.org/project/makcu/)
 [![Python Support](https://img.shields.io/pypi/pyversions/makcu.svg)](https://pypi.org/project/makcu/)
 [![License](https://img.shields.io/badge/license-GPL-blue.svg)](LICENSE)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/makcu?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=BRIGHTGREEN&left_text=downloads)](https://pepy.tech/projects/makcu)
 
 Makcu Py Lib is a high-performance Python library for controlling Makcu devices — now with **async/await support**, **zero-delay command execution**, and **automatic reconnection**!
 
