@@ -1,3 +1,7 @@
+### ⚠️ Please read before any posts or requests.
+## With the upcoming release of the MAKXD2, I plan to deliver a new major update to this repository that aligns with the latest firmware. Until then, this project should be considered as-is, with no guarantees of ongoing support or updates. That said I ***WILL*** keep up with issues. If anything is broken or needs fixing I will fix it, but this should not be expected to happen quickly.
+
+---
 # 🖱️ Makcu Python Library v2.3.0
 
 [![PyPI Version](https://img.shields.io/pypi/v/makcu.svg)](https://pypi.org/project/makcu/)
