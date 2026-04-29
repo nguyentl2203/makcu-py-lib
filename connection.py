@@ -167,7 +167,7 @@ class SerialTransport:
             return
 
         changed_bits = byte_val ^ self._last_button_mask
-        print("\n", end='')
+        #print("\n", end='')
         self._log(f"Button state changed: 0x{self._last_button_mask:02X} -> 0x{byte_val:02X}")
 
         for bit in range(8):
