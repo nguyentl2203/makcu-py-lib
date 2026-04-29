@@ -11,7 +11,8 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/nguyentl2203/makcu-py-lib",
-    packages=find_packages(),
+    package_dir={'makcu': '.'},
+    packages=['makcu'],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
