@@ -176,7 +176,7 @@ class SerialTransport:
                 button_name = self.BUTTON_MAP[bit] if bit < len(self.BUTTON_MAP) else f"bit{bit}"
             
                 self._log(f"Button {button_name}: {'PRESSED' if is_pressed else 'RELEASED'}")
-                print(">>> ", end='', flush=True)
+              #  print(">>> ", end='', flush=True)
                 if is_pressed:
                     self._button_states |= (1 << bit)
                 else:
